@@ -172,8 +172,8 @@ async function refreshStats() {
     const response = await fetch("/api/stats");
     if (!response.ok) return;
     const stats = await response.json();
-    splitStats.textContent = `splits: ${stats.splits}`;
-    viewStats.textContent = `views: ${stats.views}`;
+    splitStats.textContent = `types generated: ${stats.typesGenerated}`;
+    viewStats.textContent = `visitors: ${stats.visitors}`;
   } catch {
   }
 }
@@ -187,8 +187,8 @@ async function recordEvent(path, details) {
     });
     if (!response.ok) return;
     const stats = await response.json();
-    splitStats.textContent = `splits: ${stats.splits}`;
-    viewStats.textContent = `views: ${stats.views}`;
+    splitStats.textContent = `types generated: ${stats.typesGenerated}`;
+    viewStats.textContent = `visitors: ${stats.visitors}`;
   } catch {
   }
 }

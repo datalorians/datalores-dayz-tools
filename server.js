@@ -12,18 +12,35 @@ db.exec(`
     referrer text,
     accept_language text,
     country text,
+    visitor_id text,
+    generated_count integer not null default 0,
     path text,
     details text,
     created_at text not null default current_timestamp
   )
 `);
 
+try {
+  db.exec("alter table events add column visitor_id text");
+} catch {
+}
+
+try {
+  db.exec("alter table events add column generated_count integer not null default 0");
+} catch {
+}
+
 const record = db.query(`
-  insert into events (event, tool, ip, user_agent, referrer, accept_language, country, path, details)
-  values ($event, $tool, $ip, $userAgent, $referrer, $acceptLanguage, $country, $path, $details)
+  insert into events (event, tool, ip, user_agent, referrer, accept_language, country, visitor_id, generated_count, path, details)
+  values ($event, $tool, $ip, $userAgent, $referrer, $acceptLanguage, $country, $visitorId, $generatedCount, $path, $details)
 `);
 
-const countEvents = db.query("select count(*) as total from events where event = $event and tool = 'typesplitter'");
+const generatedCount = db.query("select coalesce(sum(case when generated_count > 0 then generated_count else 1 end), 0) as total from events where event = 'split' and tool = 'typesplitter'");
+const visitorCount = db.query(`
+  select count(distinct coalesce(nullif(visitor_id, ''), coalesce(nullif(ip, ''), 'unknown') || '|' || user_agent)) as total
+  from events
+  where event = 'view' and tool = 'typesplitter'
+`);
 
 Bun.serve({
   port: 80,
@@ -35,13 +52,13 @@ Bun.serve({
     }
 
     if (url.pathname === "/api/view" && request.method === "POST") {
-      await saveEvent(request, "view", url.pathname);
-      return json(stats());
+      const visitorId = await saveEvent(request, "view", url.pathname);
+      return json(stats(), visitorId);
     }
 
     if (url.pathname === "/api/split" && request.method === "POST") {
-      await saveEvent(request, "split", url.pathname);
-      return json(stats());
+      const visitorId = await saveEvent(request, "split", url.pathname);
+      return json(stats(), visitorId);
     }
 
     return serveFile(url.pathname);
@@ -51,6 +68,7 @@ Bun.serve({
 async function saveEvent(request, event, path) {
   const details = await readJson(request);
   const headers = request.headers;
+  const visitorId = visitorCookie(headers) || crypto.randomUUID();
 
   record.run({
     $event: event,
@@ -60,9 +78,13 @@ async function saveEvent(request, event, path) {
     $referrer: headers.get("referer") || "",
     $acceptLanguage: headers.get("accept-language") || "",
     $country: headers.get("cf-ipcountry") || "",
+    $visitorId: visitorId,
+    $generatedCount: Number(details.generatedFiles || 0),
     $path: path,
     $details: JSON.stringify(details),
   });
+
+  return visitorId;
 }
 
 async function readJson(request) {
@@ -80,17 +102,27 @@ function clientIp(headers) {
     || "";
 }
 
+function visitorCookie(headers) {
+  const cookie = headers.get("cookie") || "";
+  return cookie.split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith("dtid="))
+    ?.slice(5) || "";
+}
+
 function stats() {
   return {
-    splits: countEvents.get({ $event: "split" }).total,
-    views: countEvents.get({ $event: "view" }).total,
+    typesGenerated: generatedCount.get().total,
+    visitors: visitorCount.get().total,
   };
 }
 
-function json(body) {
-  return new Response(JSON.stringify(body), {
-    headers: { "content-type": "application/json" },
-  });
+function json(body, visitorId = "") {
+  const headers = new Headers({ "content-type": "application/json" });
+  if (visitorId) {
+    headers.set("set-cookie", `dtid=${visitorId}; Max-Age=31536000; Path=/; SameSite=Lax`);
+  }
+  return new Response(JSON.stringify(body), { headers });
 }
 
 function serveFile(pathname) {
