@@ -1,0 +1,18 @@
+services:
+  datalores-dayz-tools:
+    build: .
+    image: datalores-dayz-tools:latest
+    container_name: datalores-dayz-tools
+    hostname: datalores-dayz-tools
+    restart: unless-stopped
+    ports:
+      - "8187:80"
+    networks:
+      proxy:
+        aliases:
+          - datalores-dayz-tools
+
+networks:
+  proxy:
+    external: true
+    name: proxy

@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Datalore's DayZ Tools</title>
+    <link rel="stylesheet" href="/src/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="masthead">
+        <div>
+          <h1>Datalore's DayZ Tools</h1>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <nav class="tool-nav" aria-label="Tools">
+          <div class="nav-head">
+            <div class="nav-title">Tools</div>
+            <a class="home-link" href="/" data-route="/" aria-label="Home"></a>
+          </div>
+          <a class="tool-tab" href="/typesplitter" data-route="/typesplitter">
+            <strong>Types Splitter</strong>
+            <span>Split economy type files</span>
+          </a>
+        </nav>
+
+        <section class="tool-launcher" data-view="home" aria-label="DayZ tools">
+          <section class="tool-cards">
+            <a class="tool-card" href="/typesplitter" data-route="/typesplitter">
+              <span class="card-icon splitter-icon" aria-hidden="true"></span>
+              <strong>Types Splitter</strong>
+              <span>Split a types.xml into category files and a matching economycore entry.</span>
+            </a>
+          </section>
+        </section>
+
+        <section class="tool-panel" data-view="typesplitter">
+          <div class="tool-header">
+            <div>
+              <h2>Types Splitter</h2>
+              <p>Split a DayZ <code>types.xml</code> into category files and generate the matching <code>cfgeconomycore.xml</code> section.</p>
+            </div>
+          </div>
+
+          <section class="panel controls-panel">
+            <label class="file-field">
+              <span>types.xml</span>
+              <input id="typesFile" type="file" accept=".xml,text/xml">
+            </label>
+
+            <div class="actions">
+              <button id="splitButton" type="button" disabled>Split File</button>
+              <button id="clearButton" type="button">Clear</button>
+            </div>
+
+            <p id="status" class="status">Choose a types.xml file to begin.</p>
+          </section>
+
+          <section class="results">
+            <article class="panel">
+              <div class="section-title">
+                <h3>Generated Files</h3>
+                <span id="fileCount">0 files</span>
+              </div>
+              <div id="fileList" class="file-list"></div>
+              <button id="downloadZipButton" class="zip-button" type="button" disabled>Download Zip</button>
+            </article>
+
+            <article class="panel">
+              <div class="section-title">
+                <div>
+                  <h3 id="viewerTitle">File Preview</h3>
+                  <span id="viewerMeta">No file selected</span>
+                </div>
+                <div class="viewer-actions">
+                  <button id="copyFileButton" type="button" disabled>Copy</button>
+                  <button id="downloadFileButton" type="button" disabled>Download</button>
+                </div>
+              </div>
+              <textarea id="fileViewer" spellcheck="false" readonly></textarea>
+            </article>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="/src/app.js"></script>
+  </body>
+</html>
