@@ -405,6 +405,14 @@ code {
   color: var(--text);
 }
 
+.footer-link {
+  color: var(--accent-2);
+}
+
+.footer-link:hover {
+  color: var(--text);
+}
+
 .github-link svg {
   width: 15px;
   height: 15px;
