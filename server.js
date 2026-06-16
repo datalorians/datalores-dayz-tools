@@ -6,8 +6,12 @@ const visitorIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-
 const files = new Map([
   ["/src/app.js", "src/app.js"],
   ["/src/styles.css", "src/styles.css"],
-  ["/reference/vanilla-chernarusplus/dayzOffline.chernarusplus/cfgeconomycore.xml", "reference/vanilla-chernarusplus/dayzOffline.chernarusplus/cfgeconomycore.xml"],
-  ["/reference/vanilla-chernarusplus/dayzOffline.chernarusplus/db/types.xml", "reference/vanilla-chernarusplus/dayzOffline.chernarusplus/db/types.xml"],
+  ["/reference/sample-chernarusplus/dayzOffline.chernarusplus/cfgeconomycore.xml", "reference/sample-chernarusplus/dayzOffline.chernarusplus/cfgeconomycore.xml"],
+  ["/reference/sample-chernarusplus/dayzOffline.chernarusplus/db/types.xml", "reference/sample-chernarusplus/dayzOffline.chernarusplus/db/types.xml"],
+  ["/reference/sample-livonia/dayzOffline.enoch/cfgeconomycore.xml", "reference/sample-livonia/dayzOffline.enoch/cfgeconomycore.xml"],
+  ["/reference/sample-livonia/dayzOffline.enoch/db/types.xml", "reference/sample-livonia/dayzOffline.enoch/db/types.xml"],
+  ["/reference/sample-sakhal/dayzOffline.sakhal/cfgeconomycore.xml", "reference/sample-sakhal/dayzOffline.sakhal/cfgeconomycore.xml"],
+  ["/reference/sample-sakhal/dayzOffline.sakhal/db/types.xml", "reference/sample-sakhal/dayzOffline.sakhal/db/types.xml"],
 ]);
 const securityHeaders = {
   "content-security-policy": "default-src 'self'; connect-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'",

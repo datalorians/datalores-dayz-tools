@@ -1,6 +1,7 @@
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
 
+const presetMap = $("#presetMap");
 const typesInput = $("#typesFile");
 const splitButton = $("#splitButton");
 const downloadZipButton = $("#downloadZipButton");
@@ -19,6 +20,20 @@ const viewStats = $("#viewStats");
 const views = $$("[data-view]");
 const routeLinks = $$("[data-route]");
 const maxTypesFileBytes = 10 * 1024 * 1024;
+const presets = {
+  chernarusplus: {
+    label: "Chernarus",
+    types: "/reference/sample-chernarusplus/dayzOffline.chernarusplus/db/types.xml",
+  },
+  livonia: {
+    label: "Livonia",
+    types: "/reference/sample-livonia/dayzOffline.enoch/db/types.xml",
+  },
+  sakhal: {
+    label: "Sakhal",
+    types: "/reference/sample-sakhal/dayzOffline.sakhal/db/types.xml",
+  },
+};
 
 const namedTypes = {
   basebuilding: new Set(["Fence", "Watchtower"]),
@@ -84,16 +99,10 @@ let selectedFileName = "";
 let viewedTool = false;
 
 typesInput.addEventListener("change", () => {
-  const file = typesInput.files[0];
-  const tooLarge = file?.size > maxTypesFileBytes;
-  splitButton.disabled = !file || tooLarge;
-  if (tooLarge) {
-    setStatus("types.xml is too large. Keep files under 10 MB.", true);
-  } else {
-    setStatus(file ? "Ready to split." : "Choose a types.xml file to begin.");
-  }
+  updateSourceState();
 });
 
+presetMap.addEventListener("change", updateSourceState);
 splitButton.addEventListener("click", splitSelectedFile);
 downloadZipButton.addEventListener("click", downloadZip);
 clearButton.addEventListener("click", clearOutput);
@@ -117,6 +126,7 @@ requestAnimationFrame(() => {
   buildTimer.textContent = `loaded in ${Math.round(performance.now())} ms`;
 });
 refreshStats();
+updateSourceState();
 
 function renderRoute() {
   const route = window.location.pathname.replace(/\/$/, "") === "/typesplitter" ? "/typesplitter" : "/";
@@ -147,15 +157,8 @@ function renderRoute() {
 async function splitSelectedFile() {
   try {
     clearOutput(false);
-    const file = typesInput.files[0];
-    if (!file) {
-      throw new Error("Choose a types.xml file to begin.");
-    }
-    if (file.size > maxTypesFileBytes) {
-      throw new Error("types.xml is too large. Keep files under 10 MB.");
-    }
-    const text = await file.text();
-    const doc = parseXml(text, "types.xml");
+    const source = await selectedSource();
+    const doc = parseXml(source.text, source.name);
     const result = splitTypes(doc);
     const categoryFiles = buildFiles(result);
     const economyCore = buildEconomySection(categoryFiles.map((file) => file.name));
@@ -174,11 +177,55 @@ async function splitSelectedFile() {
     recordEvent("/api/split", {
       tool: "typesplitter",
       generatedFiles: categoryFiles.length,
-      sourceName: file.name,
+      sourceName: source.name,
     });
   } catch (error) {
     setStatus(error.message, true);
   }
+}
+
+function updateSourceState() {
+  const file = typesInput.files[0];
+  const tooLarge = file?.size > maxTypesFileBytes;
+  splitButton.disabled = Boolean(tooLarge);
+  if (tooLarge) {
+    setStatus("types.xml is too large. Keep files under 10 MB.", true);
+    return;
+  }
+
+  const preset = selectedPreset();
+  if (file) {
+    setStatus(`Ready to split uploaded ${file.name}.`);
+  } else {
+    setStatus(`Ready to split the ${preset.label} sample.`);
+  }
+}
+
+async function selectedSource() {
+  const file = typesInput.files[0];
+  if (file) {
+    if (file.size > maxTypesFileBytes) {
+      throw new Error("types.xml is too large. Keep files under 10 MB.");
+    }
+    return {
+      name: file.name,
+      text: await file.text(),
+    };
+  }
+
+  const preset = selectedPreset();
+  const response = await fetch(preset.types);
+  if (!response.ok) {
+    throw new Error(`Could not load the ${preset.label} sample.`);
+  }
+  return {
+    name: `sample-${preset.label.toLowerCase()}-types.xml`,
+    text: await response.text(),
+  };
+}
+
+function selectedPreset() {
+  return presets[presetMap.value] || presets.chernarusplus;
 }
 
 async function refreshStats() {
@@ -446,8 +493,7 @@ function clearOutput(clearInputs = true) {
   statusEl.classList.remove("error");
   if (clearInputs) {
     typesInput.value = "";
-    splitButton.disabled = true;
-    setStatus("Choose a types.xml file to begin.");
+    updateSourceState();
   }
 }
 

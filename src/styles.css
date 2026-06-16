@@ -34,6 +34,7 @@ body {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -244,7 +245,8 @@ button:not(:disabled):hover {
   color: var(--muted);
 }
 
-.file-field input {
+.file-field input,
+.file-field select {
   width: 100%;
   border: 1px solid var(--line);
   background: #111416;
@@ -252,15 +254,22 @@ button:not(:disabled):hover {
   padding: 0.75rem;
 }
 
+.controls-panel {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.35fr) minmax(280px, 0.65fr) auto;
+  align-items: end;
+  gap: 14px;
+}
+
 .actions {
   display: flex;
   gap: 10px;
-  margin-top: 16px;
 }
 
 .status {
+  grid-column: 1 / -1;
   min-height: 1.5rem;
-  margin: 14px 0 0;
+  margin: 0;
   color: var(--accent-2);
 }
 
@@ -450,5 +459,13 @@ code {
   .results {
     grid-template-columns: 1fr;
     min-height: 720px;
+  }
+
+  .controls-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .status {
+    grid-column: auto;
   }
 }
