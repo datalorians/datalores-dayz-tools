@@ -292,7 +292,10 @@ function buildFiles(buckets) {
 }
 
 function buildEconomySection(files) {
-  const lines = ['<ce folder="types">'];
+  const lines = [
+    "<!-- Copy this section into cfgeconomycore.xml. Do not replace the whole file. -->",
+    '<ce folder="types">',
+  ];
   for (const file of [...new Set(files)].sort()) {
     lines.push(`\t<file name="${file}" type="types" />`);
   }
@@ -332,7 +335,7 @@ function showSelectedFile() {
   const hasFile = Boolean(file);
 
   viewerTitle.textContent = hasFile ? file.name : "File Preview";
-  viewerMeta.textContent = hasFile && file.count !== null ? `${file.count} types` : hasFile ? "economycore section" : "No file selected";
+  viewerMeta.textContent = hasFile && file.count !== null ? `${file.count} types` : hasFile ? "copy/paste economycore section" : "No file selected";
   fileViewer.value = hasFile ? file.text : "";
   copyFileButton.disabled = !hasFile;
   downloadFileButton.disabled = !hasFile;
