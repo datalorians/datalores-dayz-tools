@@ -187,17 +187,19 @@ async function splitSelectedFile() {
 function updateSourceState() {
   const file = typesInput.files[0];
   const tooLarge = file?.size > maxTypesFileBytes;
-  splitButton.disabled = Boolean(tooLarge);
+  const preset = selectedPreset();
+  splitButton.disabled = Boolean(tooLarge) || (!file && !preset);
   if (tooLarge) {
     setStatus("types.xml is too large. Keep files under 10 MB.", true);
     return;
   }
 
-  const preset = selectedPreset();
   if (file) {
-    setStatus(`Ready to split uploaded ${file.name}.`);
-  } else {
+    setStatus(`Ready to split custom ${file.name}.`);
+  } else if (preset) {
     setStatus(`Ready to split the ${preset.label} sample.`);
+  } else {
+    setStatus("Choose a custom types.xml or select a sample source.");
   }
 }
 
@@ -214,6 +216,10 @@ async function selectedSource() {
   }
 
   const preset = selectedPreset();
+  if (!preset) {
+    throw new Error("Choose a custom types.xml or select a sample source.");
+  }
+
   const response = await fetch(preset.types);
   if (!response.ok) {
     throw new Error(`Could not load the ${preset.label} sample.`);
@@ -225,7 +231,7 @@ async function selectedSource() {
 }
 
 function selectedPreset() {
-  return presets[presetMap.value] || presets.chernarusplus;
+  return presets[presetMap.value] || null;
 }
 
 async function refreshStats() {
