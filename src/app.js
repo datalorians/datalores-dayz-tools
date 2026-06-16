@@ -14,6 +14,8 @@ const fileViewer = $("#fileViewer");
 const viewerTitle = $("#viewerTitle");
 const viewerMeta = $("#viewerMeta");
 const buildTimer = $("#buildTimer");
+const splitStats = $("#splitStats");
+const viewStats = $("#viewStats");
 const views = $$("[data-view]");
 const routeLinks = $$("[data-route]");
 
@@ -78,6 +80,7 @@ const categoryRules = [
 
 let generatedFiles = [];
 let selectedFileName = "";
+let viewedTool = false;
 
 typesInput.addEventListener("change", () => {
   splitButton.disabled = !typesInput.files.length;
@@ -106,6 +109,7 @@ renderRoute();
 requestAnimationFrame(() => {
   buildTimer.textContent = `loaded in ${Math.round(performance.now())} ms`;
 });
+refreshStats();
 
 function renderRoute() {
   const route = window.location.pathname.replace(/\/$/, "") === "/typesplitter" ? "/typesplitter" : "/";
@@ -126,6 +130,11 @@ function renderRoute() {
   }
 
   document.title = route === "/typesplitter" ? "Types Splitter - Datalore's DayZ Tools" : "Datalore's DayZ Tools";
+
+  if (route === "/typesplitter" && !viewedTool) {
+    viewedTool = true;
+    recordEvent("/api/view", { tool: "typesplitter" });
+  }
 }
 
 async function splitSelectedFile() {
@@ -148,8 +157,39 @@ async function splitSelectedFile() {
     renderFiles();
     showSelectedFile();
     setStatus(`Created ${generatedFiles.length - 1} category files.`);
+    recordEvent("/api/split", {
+      tool: "typesplitter",
+      generatedFiles: categoryFiles.length,
+      sourceName: typesInput.files[0].name,
+    });
   } catch (error) {
     setStatus(error.message, true);
+  }
+}
+
+async function refreshStats() {
+  try {
+    const response = await fetch("/api/stats");
+    if (!response.ok) return;
+    const stats = await response.json();
+    splitStats.textContent = `splits: ${stats.splits}`;
+    viewStats.textContent = `views: ${stats.views}`;
+  } catch {
+  }
+}
+
+async function recordEvent(path, details) {
+  try {
+    const response = await fetch(path, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(details),
+    });
+    if (!response.ok) return;
+    const stats = await response.json();
+    splitStats.textContent = `splits: ${stats.splits}`;
+    viewStats.textContent = `views: ${stats.views}`;
+  } catch {
   }
 }
 

@@ -7,6 +7,8 @@ services:
     restart: unless-stopped
     ports:
       - "8187:80"
+    volumes:
+      - data:/data
     networks:
       proxy:
         aliases:
@@ -16,3 +18,6 @@ networks:
   proxy:
     external: true
     name: proxy
+
+volumes:
+  data:

@@ -1,12 +1,11 @@
-FROM nginx:1.27-alpine
+FROM oven/bun:1-alpine
 
-COPY index.html /usr/share/nginx/html/index.html
-COPY src /usr/share/nginx/html/src
-COPY reference /usr/share/nginx/html/reference
-RUN printf '%s\n' \
-    'server {' \
-    '    listen 80;' \
-    '    root /usr/share/nginx/html;' \
-    '    index index.html;' \
-    '    location / { try_files $uri $uri/ /index.html; }' \
-    '}' > /etc/nginx/conf.d/default.conf
+WORKDIR /app
+
+COPY index.html server.js ./
+COPY src ./src
+COPY reference ./reference
+
+EXPOSE 80
+
+CMD ["bun", "server.js"]
