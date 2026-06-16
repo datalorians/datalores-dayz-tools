@@ -18,6 +18,7 @@ const splitStats = $("#splitStats");
 const viewStats = $("#viewStats");
 const views = $$("[data-view]");
 const routeLinks = $$("[data-route]");
+const maxTypesFileBytes = 10 * 1024 * 1024;
 
 const namedTypes = {
   basebuilding: new Set(["Fence", "Watchtower"]),
@@ -83,8 +84,14 @@ let selectedFileName = "";
 let viewedTool = false;
 
 typesInput.addEventListener("change", () => {
-  splitButton.disabled = !typesInput.files.length;
-  setStatus(typesInput.files.length ? "Ready to split." : "Choose a types.xml file to begin.");
+  const file = typesInput.files[0];
+  const tooLarge = file?.size > maxTypesFileBytes;
+  splitButton.disabled = !file || tooLarge;
+  if (tooLarge) {
+    setStatus("types.xml is too large. Keep files under 10 MB.", true);
+  } else {
+    setStatus(file ? "Ready to split." : "Choose a types.xml file to begin.");
+  }
 });
 
 splitButton.addEventListener("click", splitSelectedFile);
@@ -140,7 +147,14 @@ function renderRoute() {
 async function splitSelectedFile() {
   try {
     clearOutput(false);
-    const text = await typesInput.files[0].text();
+    const file = typesInput.files[0];
+    if (!file) {
+      throw new Error("Choose a types.xml file to begin.");
+    }
+    if (file.size > maxTypesFileBytes) {
+      throw new Error("types.xml is too large. Keep files under 10 MB.");
+    }
+    const text = await file.text();
     const doc = parseXml(text, "types.xml");
     const result = splitTypes(doc);
     const categoryFiles = buildFiles(result);
@@ -160,7 +174,7 @@ async function splitSelectedFile() {
     recordEvent("/api/split", {
       tool: "typesplitter",
       generatedFiles: categoryFiles.length,
-      sourceName: typesInput.files[0].name,
+      sourceName: file.name,
     });
   } catch (error) {
     setStatus(error.message, true);
@@ -387,7 +401,7 @@ function createZip(files) {
     view.setUint16(10, 0, true);
     view.setUint16(12, dosTime, true);
     view.setUint16(14, dosDate, true);
-    view.setUint16(16, entry.crc, true);
+    view.setUint32(16, entry.crc, true);
     view.setUint32(20, entry.data.length, true);
     view.setUint32(24, entry.data.length, true);
     view.setUint16(28, entry.nameBytes.length, true);
