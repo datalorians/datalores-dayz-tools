@@ -388,11 +388,24 @@ code {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 14px;
   min-height: 28px;
   border-top: 1px solid var(--line);
   color: var(--muted);
   font-size: 0.82rem;
+}
+
+.footer-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-item + .footer-item::before {
+  content: "";
+  width: 1px;
+  height: 13px;
+  margin: 0 12px;
+  background: var(--line);
 }
 
 .github-link {
