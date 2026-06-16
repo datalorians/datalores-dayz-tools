@@ -325,7 +325,7 @@ function createZip(files) {
     view.setUint16(8, 0, true);
     view.setUint16(10, dosTime, true);
     view.setUint16(12, dosDate, true);
-    view.setUint16(14, crc, true);
+    view.setUint32(14, crc, true);
     view.setUint32(18, data.length, true);
     view.setUint32(22, data.length, true);
     view.setUint16(26, nameBytes.length, true);
