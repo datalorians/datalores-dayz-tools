@@ -99,6 +99,9 @@ let selectedFileName = "";
 let viewedTool = false;
 
 typesInput.addEventListener("change", () => {
+  if (typesInput.files.length) {
+    presetMap.value = "upload";
+  }
   updateSourceState();
 });
 
