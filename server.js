@@ -14,6 +14,7 @@ const files = new Map([
   ["/reference/sample-sakhal/dayzOffline.sakhal/db/types.xml", "reference/sample-sakhal/dayzOffline.sakhal/db/types.xml"],
 ]);
 const securityHeaders = {
+  "cache-control": "no-store",
   "content-security-policy": "default-src 'self'; connect-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'",
   "permissions-policy": "camera=(), microphone=(), geolocation=()",
   "referrer-policy": "same-origin",
