@@ -1,6 +1,6 @@
 # Datalore's DayZ Tools
 
-A small web app for DayZ server file tools.
+A small web app for DayZ server tools.
 
 ## Tools
 
