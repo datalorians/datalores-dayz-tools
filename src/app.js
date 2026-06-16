@@ -13,6 +13,7 @@ const fileCountEl = $("#fileCount");
 const fileViewer = $("#fileViewer");
 const viewerTitle = $("#viewerTitle");
 const viewerMeta = $("#viewerMeta");
+const buildTimer = $("#buildTimer");
 const views = $$("[data-view]");
 const routeLinks = $$("[data-route]");
 
@@ -102,6 +103,9 @@ for (const link of routeLinks) {
 }
 
 renderRoute();
+requestAnimationFrame(() => {
+  buildTimer.textContent = `loaded in ${Math.round(performance.now())} ms`;
+});
 
 function renderRoute() {
   const route = window.location.pathname.replace(/\/$/, "") === "/typesplitter" ? "/typesplitter" : "/";
