@@ -398,6 +398,7 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
 .footer-item + .footer-item::before {
