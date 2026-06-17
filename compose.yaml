@@ -1,3 +1,5 @@
+name: datalores-dayz-tools
+
 services:
   datalores-dayz-tools:
     build: .
